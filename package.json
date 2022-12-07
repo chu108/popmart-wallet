@@ -1,0 +1,28 @@
+{
+  "name": "popmart-wallet",
+  "version": "1.0.0",
+  "description": "popmart-wallet is a wallet extension for popmart",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chu108/popmart-wallet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chu108/popmart-wallet/issues"
+  },
+  "homepage": "https://github.com/chu108/popmart-wallet#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.0.203",
+    "@types/jest": "^29.2.4",
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.3",
+    "typescript": "^4.9.3"
+  }
+}
