@@ -3,6 +3,14 @@ interface TransportResponseMessage {
     data: any;
 }
 
+const ACTION = {
+    ENABLE: 'enable', // 初始化
+    AUTH_ACCOUNT_LIST: 'auth_account_list', // 获取授权用户列表
+    AUTH_ACCOUNT_DEF: 'auth_account_def', // 获取默认授权用户
+    IS_AUTH: 'is_auth', // 当前账号是否授权
+}
+
+
 class PopMartProvider {
 
     /**
@@ -17,49 +25,80 @@ class PopMartProvider {
     /**
      * 检测是否启用，未启用则授权
      */
-    public isEnable(): TransportResponseMessage {
-        if (this.editorExtensionId === "") {
-            return err("editorExtensionId is empty");
+    public enable(): Promise<any> {
+        if (this.check() !== "") {
+            return Promise.reject(this.check());
         }
-        if (chrome.runtime === undefined) {
-            return err("Extension not installed");
-        }
-        let response: TransportResponseMessage = err("");
-        chrome.runtime.sendMessage(this.editorExtensionId, {type: "enable"}, (res) => {
-            console.log("enable:", res);
-            response = res;
-        });
-        return response
+        const port = chrome.runtime.connect(this.editorExtensionId, {name: "default_pair"});
+        console.log("window:", window);
+        port.postMessage({type: "auth", uri:window.origin});
+        return new Promise((resolve)=>{
+            console.log("等待返回值。。。")
+            port.onMessage.addListener(function(msg) {
+                console.log("返回值:", msg);
+                resolve(msg)
+            });
+        })
     }
 
     /**
      * 获取所有授权账户
      */
-    public accounts(): TransportResponseMessage {
-        if (this.editorExtensionId === "") {
-            return err("editorExtensionId is empty");
+    public isAuth():Promise<boolean> {
+        return new Promise((resolve)=>{
+            chrome.runtime.sendMessage(this.editorExtensionId, {type: ACTION.IS_AUTH}, (res) => {
+                console.log("isAuth:", res);
+                resolve(res.data as boolean);
+            });
+        })
+    }
+
+    /**
+     * 获取所有授权账户
+     */
+    public async accounts(): Promise<TransportResponseMessage> {
+        if (this.check() !== "") {
+            return err(this.check())
         }
-        let response: TransportResponseMessage = err("");
-        chrome.runtime.sendMessage(this.editorExtensionId, {type: "account_list"}, (res) => {
-            console.log("account_list:", res);
-            response = res;
+        if (await this.isAuth() === false) {
+            await this.enable();
+        }
+        return new Promise((resolve)=>{
+            chrome.runtime.sendMessage(this.editorExtensionId, {type: ACTION.AUTH_ACCOUNT_LIST}, (res) => {
+                console.log("account_list:", res);
+                resolve(res);
+            });
         });
-        return response
     }
 
     /**
      * 获取默认授权账户
      */
-    public defaultAccount(): TransportResponseMessage {
-        if (this.editorExtensionId === "") {
-            return err("editorExtensionId is empty");
+    public async defaultAccount(): Promise<TransportResponseMessage> {
+        if (this.check() !== "") {
+            return err(this.check())
         }
-        let response: TransportResponseMessage = err("");
-        chrome.runtime.sendMessage(this.editorExtensionId, {type: "default_account"}, (res) => {
-            console.log("default_account:", res);
-            response = res;
+
+        if (await this.isAuth() === false) {
+            await this.enable();
+        }
+
+        return new Promise((resolve)=>{
+            chrome.runtime.sendMessage(this.editorExtensionId, {type: ACTION.AUTH_ACCOUNT_DEF}, (res) => {
+                console.log("default_account:", res);
+                resolve(res);
+            });
         });
-        return response
+    }
+
+    private check():string {
+        if (this.editorExtensionId === "") {
+            return "editorExtensionId is empty";
+        }
+        if (chrome.runtime === undefined) {
+            return "Extension not installed";
+        }
+        return "";
     }
 
 }
