@@ -1,6 +1,6 @@
 {
   "name": "popmart-wallet",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "popmart-wallet is a wallet extension for popmart",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
