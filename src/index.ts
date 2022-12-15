@@ -10,7 +10,6 @@ const ACTION = {
     IS_AUTH: 'is_auth', // 当前账号是否授权
 }
 
-
 class PopMartProvider {
 
     /**
