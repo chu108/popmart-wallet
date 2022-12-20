@@ -8,6 +8,8 @@ const ACTION = {
     AUTH_ACCOUNT_LIST: 'auth_account_list', // 获取授权用户列表
     AUTH_ACCOUNT_DEF: 'auth_account_def', // 获取默认授权用户
     IS_AUTH: 'is_auth', // 当前账号是否授权
+    AUTH:"auth",
+    VERIFY:"verify"
 }
 
 class PopMartProvider {
@@ -17,27 +19,15 @@ class PopMartProvider {
      */
     public editorExtensionId: string;
 
-    constructor(editorExtensionId: string) {
-        this.editorExtensionId = editorExtensionId;
+    constructor() {
+        this.editorExtensionId = document.getElementById("my-chrome-extension-injected")?.innerText??"";
     }
 
     /**
      * 检测是否启用，未启用则授权
      */
     public enable(): Promise<any> {
-        if (this.check() !== "") {
-            return Promise.reject(this.check());
-        }
-        const port = chrome.runtime.connect(this.editorExtensionId, {name: "default_pair"});
-        console.log("window:", window);
-        port.postMessage({type: "auth", uri:window.origin});
-        return new Promise((resolve)=>{
-            console.log("等待返回值。。。")
-            port.onMessage.addListener(function(msg) {
-                console.log("返回值:", msg);
-                resolve(msg)
-            });
-        })
+        return this.connWallet(ACTION.AUTH)
     }
 
     /**
@@ -88,6 +78,28 @@ class PopMartProvider {
                 resolve(res);
             });
         });
+    }
+
+    /**
+     * 获取所有授权账户
+     */
+    public verify():Promise<any> {
+        return this.connWallet(ACTION.VERIFY)
+    }
+
+    public connWallet(type:string):Promise<any> {
+        if (this.check() !== "") {
+            return Promise.reject(this.check());
+        }
+        const port = chrome.runtime.connect(this.editorExtensionId);
+        port.postMessage({type: type, uri:window.origin});
+        return new Promise((resolve)=>{
+            console.log("等待授权结果。。。")
+            port.onMessage.addListener(function(msg) {
+                console.log("授权结果:", msg);
+                resolve(msg)
+            });
+        })
     }
 
     private check():string {

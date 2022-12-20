@@ -1,6 +1,6 @@
 {
   "name": "popmart-wallet",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "popmart-wallet is a wallet extension for popmart",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,10 +34,5 @@
     "package.json"
   ],
   "dependencies": {
-    "@metamask/detect-provider": "^2.0.0",
-    "@polkadot/extension-inject": "^0.44.6",
-    "@polkadot/util": "^10.2.1",
-    "@polkadot/util-crypto": "^10.2.1",
-    "web3": "^1.8.1"
   }
 }
